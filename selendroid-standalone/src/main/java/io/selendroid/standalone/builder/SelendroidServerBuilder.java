@@ -34,6 +34,8 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -389,14 +391,12 @@ public class SelendroidServerBuilder {
   }
 
   private static String getVersionFromPom(String path) throws Exception {
-    String version = "";
     path += "pom.xml";
-    String input = FileUtils.readFileToString(new File(path), "UTF-8");
-
-    String START_TAG = "<version>";
-    String END_TAG = "</version>";
-    version = input.substring(input.indexOf(START_TAG) + START_TAG.length(), input.indexOf(END_TAG));
-    return version;
+    Pattern regex = Pattern.compile("<version>(.*?)</version>", Pattern.DOTALL);
+    Matcher matcher = regex.matcher(FileUtils.readFileToString(new File(path)));
+    if (matcher.find()) {
+      return matcher.group(1);
+    } else return "dev";
   }
 
   private String getSigAlg() {
